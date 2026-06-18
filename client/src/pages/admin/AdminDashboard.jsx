@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { FiImage, FiGrid, FiCalendar, FiLogOut, FiCamera, FiMenu, FiX, FiTrendingUp, FiSettings, FiBarChart2, FiSliders, FiCpu } from 'react-icons/fi';
+import { FiHome, FiCalendar, FiMessageSquare, FiImage, FiGrid, FiSettings, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api';
 import './AdminDashboard.css';
 
 const navItems = [
-  { to: '/admin', icon: <FiTrendingUp />, label: 'Overview', exact: true },
-  { to: '/admin/analytics', icon: <FiBarChart2 />, label: 'Analytics' },
-  { to: '/admin/operations', icon: <FiSliders />, label: 'Operations & Logs' },
-  { to: '/admin/business', icon: <FiCpu />, label: 'Business & AI' },
-  { to: '/admin/portfolio', icon: <FiImage />, label: 'Portfolio' },
-  { to: '/admin/services', icon: <FiGrid />, label: 'Services' },
+  { to: '/admin', icon: <FiHome />, label: 'Dashboard', exact: true },
   { to: '/admin/bookings', icon: <FiCalendar />, label: 'Bookings' },
-  { to: '/admin/settings', icon: <FiSettings />, label: 'Account Settings' },
+  { to: '/admin/operations', icon: <FiMessageSquare />, label: 'Queries' },
+  { to: '/admin/portfolio', icon: <FiImage />, label: 'Gallery' },
+  { to: '/admin/services', icon: <FiGrid />, label: 'Services' },
+  { to: '/admin/settings', icon: <FiSettings />, label: 'Settings' },
 ];
 
 const AdminDashboard = () => {
@@ -36,19 +34,13 @@ const AdminDashboard = () => {
       {/* Sidebar */}
       <aside className={`admin__sidebar ${sidebarOpen ? 'admin__sidebar--open' : ''}`}>
         <div className="admin__sidebar-top">
-          <Link to="/" className="admin__logo">
-            <FiCamera className="text-gold" />
-            <span className="font-heading"><span className="text-gold">Luminos</span></span>
+          <Link to="/" className="admin__logo" style={{ textDecoration: 'none' }}>
+            <span className="font-heading" style={{ fontSize: '1.25rem', letterSpacing: '0.05em', fontWeight: 700 }}>
+              <span style={{ color: '#ffffff' }}>ADMIN</span>
+              <span style={{ color: 'var(--gold)' }}>PANEL</span>
+            </span>
           </Link>
           <button className="admin__sidebar-close" onClick={() => setSidebarOpen(false)}><FiX /></button>
-        </div>
-
-        <div className="admin__user">
-          <div className="admin__user-avatar">{user?.username?.[0]?.toUpperCase()}</div>
-          <div>
-            <div className="admin__user-name">{user?.username}</div>
-            <div className="admin__user-role">Administrator</div>
-          </div>
         </div>
 
         <nav className="admin__nav">
@@ -65,8 +57,24 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        <button className="admin__logout" onClick={handleLogout}>
-          <FiLogOut /> Sign Out
+        <button className="admin__logout-btn" onClick={handleLogout} style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          margin: '0 20px 20px',
+          padding: '12px 14px',
+          borderRadius: '4px',
+          fontSize: '0.875rem',
+          color: '#e05252',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+          width: 'calc(100% - 40px)',
+          transition: 'all 0.2s ease',
+          fontWeight: 500
+        }}>
+          <FiLogOut size={16} /> Sign Out
         </button>
       </aside>
 
@@ -79,10 +87,26 @@ const AdminDashboard = () => {
         <header className="admin__topbar">
           <button className="admin__menu-btn" onClick={() => setSidebarOpen(true)}><FiMenu /></button>
           <div className="admin__topbar-title">
-            {navItems.find(n => isActive(n))?.label || 'Dashboard'}
+            {location.pathname === '/admin/services' ? 'Service Packages Editor' : (navItems.find(n => isActive(n))?.label || 'Dashboard')}
           </div>
-          <div className="admin__topbar-right">
-            <Link to="/" className="btn btn-secondary btn-sm" target="_blank">View Site</Link>
+          <div className="admin__topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span className="admin__topbar-welcome" style={{ fontSize: '0.82rem', color: 'var(--silver)' }}>
+              Welcome, {user?.fullName || user?.username || 'Jonathan Admin'}
+            </span>
+            <div className="admin__topbar-avatar" style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: 'var(--gold)',
+              color: '#000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold',
+              fontSize: '0.85rem'
+            }}>
+              {(user?.fullName || user?.username || 'Jonathan Admin')[0].toUpperCase()}
+            </div>
           </div>
         </header>
 

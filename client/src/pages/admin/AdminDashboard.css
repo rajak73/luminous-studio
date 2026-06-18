@@ -100,18 +100,23 @@
   border-left-color: var(--gold);
 }
 
-.admin__logout {
+.admin__logout-btn {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0 12px;
+  margin: auto 12px 0;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   font-size: 0.875rem;
   color: var(--silver);
   transition: var(--transition);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: calc(100% - 24px);
+  text-align: left;
 }
-.admin__logout:hover { color: var(--danger); background: rgba(224,82,82,0.08); }
+.admin__logout-btn:hover { color: #ff5252; background: rgba(224,82,82,0.06); }
 
 /* Main */
 .admin__main {

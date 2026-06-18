@@ -2,13 +2,12 @@
   background: var(--charcoal-3);
   border: 1px solid rgba(201, 168, 76, 0.12);
   border-radius: var(--radius-md);
-  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
   position: relative;
   transition: var(--transition);
   overflow: hidden;
+  height: 100%;
 }
 
 .service-card::before {
@@ -21,6 +20,7 @@
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
   opacity: 0;
   transition: var(--transition);
+  z-index: 10;
 }
 
 .service-card:hover {
@@ -37,82 +37,136 @@
 }
 .service-card--popular::before { opacity: 1; }
 
+/* Image Wrap */
+.service-card__image-wrap {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+  background: var(--charcoal-4);
+}
+
+.service-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.service-card:hover .service-card__image {
+  transform: scale(1.04);
+}
+
 .service-card__badge {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 12px;
+  right: 12px;
   display: flex;
   align-items: center;
   gap: 5px;
   background: linear-gradient(135deg, var(--gold), var(--gold-dark));
   color: var(--charcoal);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 5px 12px;
-  border-radius: 50px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  z-index: 5;
 }
 
-.service-card__header { display: flex; flex-direction: column; gap: 8px; }
-
-.service-card__category {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+.service-card__cat-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--gold);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+  z-index: 5;
+}
+
+/* Card Body */
+.service-card__body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+}
+
+.service-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .service-card__name {
   font-family: var(--font-heading);
-  font-size: 1.6rem;
+  font-size: 1.25rem;
   color: var(--cream);
-  line-height: 1.2;
+  line-height: 1.3;
+  margin: 0;
+  flex: 1;
+}
+
+.service-card__price-val {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--gold);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .service-card__desc {
   color: var(--silver);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 2.55rem;
 }
 
-.service-card__price {
+.service-card__features-wrap {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 16px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
 }
 
-.service-card__price-label {
-  font-size: 0.75rem;
-  color: var(--silver);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.service-card__price-amount {
-  font-family: var(--font-heading);
-  font-size: 2.2rem;
-  color: var(--gold);
+.service-card__features-label {
+  font-size: 0.68rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--silver);
+  opacity: 0.7;
 }
 
 .service-card__features {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  flex: 1;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
 }
 
 .service-card__feature {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 0.875rem;
+  gap: 8px;
+  font-size: 0.82rem;
   color: var(--cream-dim);
   line-height: 1.4;
 }
@@ -123,4 +177,6 @@
   margin-top: 2px;
 }
 
-.service-card__cta { margin-top: auto; }
+.service-card__cta {
+  margin-top: 8px;
+}

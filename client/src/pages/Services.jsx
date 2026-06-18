@@ -21,9 +21,10 @@ const Services = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = activeCategory === 'all'
+  const filtered = (activeCategory === 'all'
     ? services
-    : services.filter(s => s.category === activeCategory);
+    : services.filter(s => s.category === activeCategory)
+  ).filter(s => s.active !== false);
 
   return (
     <div className="services page-top">
