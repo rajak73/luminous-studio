@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiPhone, FiCalendar, FiFileText, FiCheck, FiArrowRight, FiShare2, FiGift } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiCalendar, FiFileText, FiCheck, FiArrowRight } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import api from '../api';
 import './Booking.css';
@@ -123,9 +123,6 @@ const Booking = () => {
 
   // Success screen
   if (booking) {
-    const points = Math.floor((booking.totalAmount || 0) / 100);
-    const referralLink = `${window.location.origin}/booking?ref=${booking.bookingReference}`;
-
     return (
       <div className="booking page-top">
         <div className="container section" style={{ maxWidth: '640px' }}>
@@ -138,30 +135,6 @@ const Booking = () => {
               <div className="booking__ref-label">Your Booking Reference</div>
               <div className="booking__ref-code text-gold font-heading">{booking.bookingReference}</div>
               <div className="booking__ref-note text-silver">A confirmation email has been sent to {booking.email}</div>
-            </div>
-
-            {/* Loyalty points */}
-            {points > 0 && (
-              <div className="booking__rewards card" style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', padding: '16px' }}>
-                <FiGift className="text-gold" size={20} />
-                <span style={{ fontSize: '0.85rem' }}>You've earned <strong className="text-gold">{points} loyalty points</strong> from this booking!</span>
-              </div>
-            )}
-
-            {/* Referral program */}
-            <div className="booking__referral card" style={{ marginTop: '16px', padding: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
-                <FiShare2 className="text-gold" />
-                <span style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Refer a Friend Program</span>
-              </div>
-              <p style={{ fontSize: '0.78rem', color: 'var(--silver)', marginBottom: '12px' }}>Share this link. When they book, you both get a 10% discount on your next session!</p>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input readOnly value={referralLink} className="form-input" style={{ fontSize: '0.75rem', padding: '8px 12px' }} />
-                <button className="btn btn-primary btn-sm" onClick={() => {
-                  navigator.clipboard.writeText(referralLink);
-                  alert('Referral link copied to clipboard!');
-                }}>Copy</button>
-              </div>
             </div>
 
             {/* Event Countdown */}

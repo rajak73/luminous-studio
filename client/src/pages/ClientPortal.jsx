@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FiUser, FiCalendar, FiClock, FiFileText, FiDownload, FiCheck, FiKey, FiPlus, FiTrash, FiAward } from 'react-icons/fi';
+import { FiUser, FiCalendar, FiClock, FiFileText, FiDownload, FiCheck, FiKey, FiPlus, FiTrash } from 'react-icons/fi';
 import api from '../api';
 import './ClientPortal.css';
 
@@ -343,10 +343,6 @@ const ClientPortal = () => {
     );
   }
 
-  // Calculate mock loyalty points: ₹100 spent = 1 point
-  const totalSpentVal = bookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-  const loyaltyPoints = Math.floor(totalSpentVal / 100);
-
   return (
     <div className="client-portal container section animate-fade-in">
       {/* Header Profile Dashboard */}
@@ -360,11 +356,6 @@ const ClientPortal = () => {
             <p className="text-silver" style={{ fontSize: '0.85rem' }}>
               Access your digital assets, contract documents, event lists, and schedules.
             </p>
-          </div>
-          <div className="client-portal__loyalty text-center">
-            <FiAward size={28} className="text-gold" style={{ marginBottom: '4px' }} />
-            <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--silver)' }}>Loyalty Tier</div>
-            <strong className="text-gold" style={{ fontSize: '1.2rem' }}>{loyaltyPoints} Points</strong>
           </div>
         </div>
         <button onClick={logout} className="btn btn-outline-gold btn-sm client-portal__logout">Logout</button>

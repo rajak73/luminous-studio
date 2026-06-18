@@ -86,12 +86,7 @@
   justify-content: center;
 }
 
-.client-portal__loyalty {
-  padding: 8px 18px;
-  background: rgba(201, 168, 76, 0.05);
-  border: 1px solid rgba(201, 168, 76, 0.15);
-  border-radius: var(--radius-sm);
-}
+
 
 .client-portal__logout {
   align-self: center;
