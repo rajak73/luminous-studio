@@ -42,9 +42,9 @@ router.post('/', protect, upload.single('imageFile'), async (req, res) => {
     
     if (req.file) {
       if (req.file.path && req.file.path.startsWith('http')) {
-        serviceData.image = req.file.path;
+        serviceData.imageUrl = req.file.path;
       } else {
-        serviceData.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        serviceData.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
       }
     }
 
@@ -67,9 +67,9 @@ router.put('/:id', protect, upload.single('imageFile'), async (req, res) => {
     
     if (req.file) {
       if (req.file.path && req.file.path.startsWith('http')) {
-        serviceData.image = req.file.path;
+        serviceData.imageUrl = req.file.path;
       } else {
-        serviceData.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        serviceData.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
       }
     }
 

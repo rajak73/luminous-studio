@@ -6,7 +6,7 @@ const ServiceSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   category: { type: String, default: 'other' },
   options: [{ type: String }],
-  image: { type: String, default: '' },
+  imageUrl: { type: String, default: '' },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 

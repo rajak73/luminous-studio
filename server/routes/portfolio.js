@@ -21,25 +21,25 @@ router.get('/', async (req, res) => {
 // POST /api/portfolio - admin only
 router.post('/', protect, upload.single('image'), async (req, res) => {
   try {
-    const { category, caption, order, featured, isActive } = req.body;
-    let imageUrl = req.body.image; // fallback to URL if provided
+    const { category, title, order, featured, isActive } = req.body;
+    let finalUrl = req.body.cloudinaryUrl || req.body.image; // fallback to URL if provided
 
     if (req.file) {
       if (req.file.path && req.file.path.startsWith('http')) {
-        imageUrl = req.file.path;
+        finalUrl = req.file.path;
       } else {
-        imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        finalUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
       }
     }
 
-    if (!imageUrl) {
+    if (!finalUrl) {
       return res.status(400).json({ message: 'Image is required' });
     }
 
     const portfolio = new Portfolio({
-      image: imageUrl,
+      cloudinaryUrl: finalUrl,
       category: category || 'other',
-      caption: caption || '',
+      title: title || '',
       order: order || 0,
       featured: featured === 'true' || featured === true,
       isActive: isActive !== 'false' && isActive !== false
@@ -59,9 +59,9 @@ router.put('/:id', protect, upload.single('image'), async (req, res) => {
     
     if (req.file) {
       if (req.file.path && req.file.path.startsWith('http')) {
-        updateData.image = req.file.path;
+        updateData.cloudinaryUrl = req.file.path;
       } else {
-        updateData.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        updateData.cloudinaryUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
       }
     }
 
