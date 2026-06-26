@@ -1,146 +1,110 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const User = require('./models/User');
+const bcrypt = require('bcryptjs');
+
+const Admin = require('./models/Admin');
 const Service = require('./models/Service');
-const Image = require('./models/Image');
+const Portfolio = require('./models/Portfolio');
+const SiteSettings = require('./models/SiteSettings');
 
-const sampleServices = [
-  {
-    name: 'Wedding Photography',
-    description: 'Complete wedding day coverage with a team of professional photographers capturing every precious moment.',
-    price: 45000,
-    category: 'wedding',
-    popular: true,
-    features: [
-      'Full day coverage (10 hours)',
-      '2 professional photographers',
-      '500+ edited photos',
-      'Online gallery delivery',
-      'Printed photo album (50 pages)',
-      'Drone aerial shots included'
-    ]
-  },
-  {
-    name: 'Wedding Cinematic Video',
-    description: 'Cinematic wedding film that tells your love story with breathtaking visuals and emotional storytelling.',
-    price: 35000,
-    category: 'wedding',
-    popular: true,
-    features: [
-      'Full day videography',
-      '4K cinematic quality',
-      '10-15 minute highlight film',
-      'Full ceremony & reception film',
-      'Same-day reel for social media',
-      'Background music licensed'
-    ]
-  },
-  {
-    name: 'Birthday Celebration Package',
-    description: 'Capture every laugh, cake cut, and dance move at your birthday celebration in stunning detail.',
-    price: 15000,
-    category: 'birthday',
-    popular: false,
-    features: [
-      '4 hours of coverage',
-      '1 professional photographer',
-      '200+ edited photos',
-      'Online gallery delivery',
-      'Same-day previews (5 photos)',
-      'Candid & posed shots'
-    ]
-  },
-  {
-    name: 'Corporate Event Coverage',
-    description: 'Professional documentation of corporate events, conferences, product launches, and team events.',
-    price: 25000,
-    category: 'corporate',
-    popular: false,
-    features: [
-      '8 hours of coverage',
-      'Headshots for up to 20 people',
-      '300+ edited corporate photos',
-      'Quick 48-hour turnaround',
-      'High-res print-ready files',
-      'Commercial usage rights'
-    ]
-  },
-  {
-    name: 'Portrait Session',
-    description: 'Stunning individual or family portrait sessions at your choice of location or our premium studio.',
-    price: 8000,
-    category: 'portrait',
-    popular: false,
-    features: [
-      '2 hours session',
-      '2 outfit changes',
-      '50+ edited portraits',
-      'Indoor/outdoor location',
-      'Digital files included',
-      'Print packages available'
-    ]
-  },
-  {
-    name: 'Pre-Wedding Shoot',
-    description: 'Romantic pre-wedding photo session at a beautiful location to celebrate your upcoming union.',
-    price: 20000,
-    category: 'wedding',
-    popular: false,
-    features: [
-      '6 hours location shoot',
-      '150+ edited photos',
-      'Multiple locations',
-      'Styling guidance provided',
-      'Same-day 10-photo preview',
-      'Engagement album option'
-    ]
-  }
-];
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/luminosbook';
 
-const sampleImages = [
-  { title: 'Golden Hour Wedding', category: 'wedding', cloudinaryUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200', publicId: 'demo-1', featured: true },
-  { title: 'Bridal Portrait', category: 'wedding', cloudinaryUrl: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=1200', publicId: 'demo-2', featured: true },
-  { title: 'Wedding Reception', category: 'wedding', cloudinaryUrl: 'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=1200', publicId: 'demo-3', featured: false },
-  { title: 'Couple in Garden', category: 'wedding', cloudinaryUrl: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=1200', publicId: 'demo-4', featured: false },
-  { title: 'Birthday Cake Moment', category: 'birthday', cloudinaryUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200', publicId: 'demo-5', featured: true },
-  { title: 'Birthday Celebration', category: 'birthday', cloudinaryUrl: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200', publicId: 'demo-6', featured: false },
-  { title: 'Kids Birthday Party', category: 'birthday', cloudinaryUrl: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=1200', publicId: 'demo-7', featured: false },
-  { title: 'Corporate Conference', category: 'corporate', cloudinaryUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200', publicId: 'demo-8', featured: true },
-  { title: 'Business Team Photo', category: 'corporate', cloudinaryUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200', publicId: 'demo-9', featured: false },
-  { title: 'Product Launch Event', category: 'corporate', cloudinaryUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1200', publicId: 'demo-10', featured: false },
-  { title: 'Award Ceremony', category: 'corporate', cloudinaryUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200', publicId: 'demo-11', featured: false },
-  { title: 'Romantic Pre-Wedding', category: 'wedding', cloudinaryUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=1200', publicId: 'demo-12', featured: false }
-];
-
-const seed = async () => {
+const seedDatabase = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(MONGODB_URI);
     console.log('✅ Connected to MongoDB');
 
-    // Clear existing data
-    await User.deleteMany({});
-    await Service.deleteMany({});
-    await Image.deleteMany({});
+    const resetMode = process.argv.includes('--reset');
 
-    // Create admin user
-    const admin = new User({ username: 'admin', password: 'admin123' });
-    await admin.save();
-    console.log('✅ Admin user created: admin / admin123');
+    if (resetMode) {
+      console.log('⚠️ Reset mode enabled. Clearing existing collections...');
+      await Admin.deleteMany({});
+      await Service.deleteMany({});
+      await Portfolio.deleteMany({});
+      await SiteSettings.deleteMany({});
+      const Booking = require('./models/Booking');
+      await Booking.deleteMany({});
+      console.log('✅ Collections cleared.');
+    }
 
-    // Insert services
-    await Service.insertMany(sampleServices);
-    console.log(`✅ ${sampleServices.length} services seeded`);
+    // 1. Seed Admin
+    const adminExists = await Admin.findOne();
+    if (!adminExists) {
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@luminosstudio.com';
+      const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
+      const admin = new Admin({
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin'
+      });
+      await admin.save();
+      console.log(`✅ Default admin created: ${adminEmail}`);
+    } else {
+      console.log('⏩ Admin already exists. Skipping...');
+    }
 
-    // Insert images
-    await Image.insertMany(sampleImages);
-    console.log(`✅ ${sampleImages.length} portfolio images seeded`);
+    // 2. Seed Services
+    const servicesCount = await Service.countDocuments();
+    if (servicesCount === 0) {
+      const defaultServices = [
+        { name: 'Wedding Photography Package', description: 'Complete wedding day coverage.', price: 45000, category: 'Wedding', options: ['Drone coverage', 'Extra hour', 'Premium album'], image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800' },
+        { name: 'Birthday Event Photography', description: 'Candid and posed shots for birthdays.', price: 15000, category: 'Birthday', options: ['Photo booth', 'Extra hour'], image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800' },
+        { name: 'Corporate Event Coverage', description: 'Professional documentation of corporate events.', price: 25000, category: 'Corporate', options: ['Headshots setup', 'Express delivery'], image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800' },
+        { name: 'Pre-Wedding Shoot', description: 'Romantic location shoot before the wedding.', price: 20000, category: 'Wedding', options: ['Multiple locations', 'Stylist'], image: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800' },
+        { name: 'Product Photography', description: 'High-quality studio product shots.', price: 10000, category: 'Product', options: ['White background', 'Lifestyle setup'], image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800' },
+        { name: 'Portrait Session', description: 'Individual or family portrait sessions.', price: 8000, category: 'Portrait', options: ['Studio setup', 'Outdoor location'], image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800' }
+      ];
+      await Service.insertMany(defaultServices);
+      console.log('✅ Starter services created.');
+    } else {
+      console.log('⏩ Services already exist. Skipping...');
+    }
 
-    console.log('\n🎉 Database seeded successfully!\n');
+    // 3. Seed Portfolio
+    const portfolioCount = await Portfolio.countDocuments();
+    if (portfolioCount === 0) {
+      const defaultPortfolio = [
+        { image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200', category: 'Wedding', caption: 'Golden Hour Wedding', order: 1, featured: true },
+        { image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200', category: 'Birthday', caption: 'Birthday Celebration', order: 2, featured: true },
+        { image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200', category: 'Corporate', caption: 'Corporate Conference', order: 3, featured: false },
+        { image: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=1200', category: 'Wedding', caption: 'Bridal Portrait', order: 4, featured: false },
+        { image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200', category: 'Corporate', caption: 'Award Ceremony', order: 5, featured: true },
+        { image: 'https://images.unsplash.com/photo-1530103862676-de88d1d87e1f?w=1200', category: 'Birthday', caption: 'Sweet 16 Party', order: 6, featured: false },
+        { image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200', category: 'Portrait', caption: 'Studio Portrait', order: 7, featured: true },
+        { image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200', category: 'Product', caption: 'Headphones Product Shot', order: 8, featured: true }
+      ];
+      await Portfolio.insertMany(defaultPortfolio);
+      console.log('✅ Starter portfolio images created.');
+    } else {
+      console.log('⏩ Portfolio already exists. Skipping...');
+    }
+
+    // 4. Seed Settings
+    const settingsExist = await SiteSettings.findOne();
+    if (!settingsExist) {
+      await SiteSettings.create({
+        studioName: 'Luminos Studio',
+        logo: '',
+        primaryColor: '#0d0d0d',
+        secondaryColor: '#c9a84c',
+        phone: '+1 234 567 8900',
+        email: 'hello@luminosstudio.com',
+        address: '123 Photography Lane, NY',
+        adminEmail: process.env.ADMIN_EMAIL || 'admin@luminosstudio.com',
+        heroTitle: 'Capturing Life\'s Most Beautiful Moments',
+        heroSubtitle: 'Premium Photography Studio for Weddings, Events, and Portraits'
+      });
+      console.log('✅ Site settings created.');
+    } else {
+      console.log('⏩ Site settings already exist. Skipping...');
+    }
+
+    console.log('🎉 Seeding complete.');
     process.exit(0);
   } catch (err) {
-    console.error('❌ Seeding failed:', err.message);
+    console.error('❌ Seeding error:', err);
     process.exit(1);
   }
 };
 
-seed();
+seedDatabase();

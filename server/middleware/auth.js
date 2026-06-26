@@ -1,16 +1,25 @@
 const jwt = require('jsonwebtoken');
+const Admin = require('../models/Admin');
 
-const protect = (req, res, next) => {
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Not authorized, no token' });
+const protect = async (req, res, next) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'luminosbook_secret_2024');
+      req.admin = await Admin.findById(decoded.id).select('-password');
+      if (!req.admin) {
+        return res.status(401).json({ message: 'Not authorized, admin not found' });
+      }
+      next();
+    } catch (error) {
+      console.error(error);
+      res.status(401).json({ message: 'Not authorized, token failed' });
+    }
   }
-  try {
-    const token = auth.split(' ')[1];
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch {
-    return res.status(401).json({ message: 'Token invalid or expired' });
+
+  if (!token) {
+    res.status(401).json({ message: 'Not authorized, no token' });
   }
 };
 

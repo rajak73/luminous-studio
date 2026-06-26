@@ -1,62 +1,91 @@
 const express = require('express');
 const router = express.Router();
-const Image = require('../models/Image');
+const Portfolio = require('../models/Portfolio');
 const { protect } = require('../middleware/auth');
-const { upload, cloudinary } = require('../middleware/upload');
+const { upload } = require('../middleware/upload');
 
-// GET /api/portfolio — public
+// GET /api/portfolio - public
 router.get('/', async (req, res) => {
   try {
     const filter = {};
     if (req.query.category && req.query.category !== 'all') {
       filter.category = req.query.category;
     }
-    const images = await Image.find(filter).sort({ createdAt: -1 });
+    const images = await Portfolio.find(filter).sort({ order: 1, createdAt: -1 });
     res.json(images);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST /api/portfolio — admin only
+// POST /api/portfolio - admin only
 router.post('/', protect, upload.single('image'), async (req, res) => {
   try {
-    const { title, category, featured } = req.body;
-    const image = new Image({
-      title,
+    const { category, caption, order, featured, isActive } = req.body;
+    let imageUrl = req.body.image; // fallback to URL if provided
+
+    if (req.file) {
+      if (req.file.path && req.file.path.startsWith('http')) {
+        imageUrl = req.file.path;
+      } else {
+        imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+      }
+    }
+
+    if (!imageUrl) {
+      return res.status(400).json({ message: 'Image is required' });
+    }
+
+    const portfolio = new Portfolio({
+      image: imageUrl,
       category: category || 'other',
-      cloudinaryUrl: req.file.path,
-      publicId: req.file.filename,
-      featured: featured === 'true'
+      caption: caption || '',
+      order: order || 0,
+      featured: featured === 'true' || featured === true,
+      isActive: isActive !== 'false' && isActive !== false
     });
-    await image.save();
-    res.status(201).json(image);
+    
+    await portfolio.save();
+    res.status(201).json(portfolio);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// DELETE /api/portfolio/:id — admin only
+// PUT /api/portfolio/:id - admin only
+router.put('/:id', protect, upload.single('image'), async (req, res) => {
+  try {
+    const updateData = { ...req.body };
+    
+    if (req.file) {
+      if (req.file.path && req.file.path.startsWith('http')) {
+        updateData.image = req.file.path;
+      } else {
+        updateData.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+      }
+    }
+
+    // Convert string booleans
+    if (updateData.featured === 'true') updateData.featured = true;
+    if (updateData.featured === 'false') updateData.featured = false;
+    if (updateData.isActive === 'true') updateData.isActive = true;
+    if (updateData.isActive === 'false') updateData.isActive = false;
+
+    const portfolio = await Portfolio.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!portfolio) return res.status(404).json({ message: 'Portfolio item not found' });
+    res.json(portfolio);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE /api/portfolio/:id - admin only
 router.delete('/:id', protect, async (req, res) => {
   try {
-    const image = await Image.findById(req.params.id);
-    if (!image) return res.status(404).json({ message: 'Image not found' });
-    await cloudinary.uploader.destroy(image.publicId);
-    await image.deleteOne();
-    res.json({ message: 'Image deleted' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// PATCH /api/portfolio/:id/featured — toggle featured
-router.patch('/:id/featured', protect, async (req, res) => {
-  try {
-    const image = await Image.findById(req.params.id);
-    if (!image) return res.status(404).json({ message: 'Image not found' });
-    image.featured = !image.featured;
-    await image.save();
-    res.json(image);
+    const portfolio = await Portfolio.findByIdAndDelete(req.params.id);
+    if (!portfolio) return res.status(404).json({ message: 'Portfolio item not found' });
+    // Note: in a production app, we would also delete the file from the uploads directory here
+    res.json({ message: 'Portfolio item deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

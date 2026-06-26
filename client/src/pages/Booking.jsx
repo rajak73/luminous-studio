@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiPhone, FiCalendar, FiFileText, FiCheck, FiArrowRight } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiCalendar, FiFileText, FiCheck, FiArrowRight, FiMessageCircle } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import api from '../api';
 import './Booking.css';
@@ -65,8 +65,10 @@ const Booking = () => {
   });
   const [errors, setErrors] = useState({});
   const [bookedDates, setBookedDates] = useState([]);
+  const [settings, setSettings] = useState(null);
 
   useEffect(() => {
+    api.get('/settings').then(({ data }) => setSettings(data)).catch(() => {});
     api.get('/bookings/booked-dates')
       .then(({ data }) => setBookedDates(data))
       .catch(() => {});
@@ -123,6 +125,23 @@ const Booking = () => {
 
   // Success screen
   if (booking) {
+    let waLink = null;
+    if (settings?.whatsappNumber) {
+      const servicesStr = booking.services?.map(s => s.name).join(', ') || 'None';
+      const msg = `Hello Luminos Studio, I have submitted a booking request.
+
+Name: ${booking.customerName}
+Email: ${booking.email}
+Phone: ${booking.phone}
+Event Date: ${new Date(booking.eventDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+Selected Services: ${servicesStr}
+Total: ₹${booking.totalAmount.toLocaleString('en-IN')}
+Notes: ${booking.notes || 'None'}
+
+Please confirm availability.`;
+      waLink = `https://wa.me/${settings.whatsappNumber}?text=${encodeURIComponent(msg)}`;
+    }
+
     return (
       <div className="booking page-top">
         <div className="container section" style={{ maxWidth: '640px' }}>
@@ -139,6 +158,14 @@ const Booking = () => {
 
             {/* Event Countdown */}
             {booking.eventDate && <CountdownTimer targetDate={booking.eventDate} />}
+
+            {waLink && (
+              <div style={{ marginTop: '32px', textAlign: 'center' }}>
+                <a href={waLink} target="_blank" rel="noopener noreferrer" className="btn btn-outline-gold btn-lg">
+                  <FiMessageCircle /> Send Booking Details on WhatsApp
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>

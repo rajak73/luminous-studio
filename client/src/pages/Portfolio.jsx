@@ -1,20 +1,28 @@
 import { useState, useEffect } from 'react';
 import { FiFilter, FiHeart, FiSearch } from 'react-icons/fi';
+import { useSearchParams } from 'react-router-dom';
 import Lightbox from '../components/Lightbox';
 import api from '../api';
 import './Portfolio.css';
 
 const categories = [
-  { key: 'all', label: 'All Work' },
-  { key: 'wedding', label: 'Wedding' },
-  { key: 'birthday', label: 'Birthday' },
-  { key: 'corporate', label: 'Corporate' },
-  { key: 'favorites', label: '❤ Wishlist' },
+  'All Work',
+  'Wedding',
+  'Birthday',
+  'Corporate',
+  'Portrait',
+  'Product'
 ];
 
 const Portfolio = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [images, setImages] = useState([]);
-  const [active, setActive] = useState('all');
+  
+  const categoryFromUrl = searchParams.get('category') || 'All Work';
+  const isValidCategory = categories.some(c => c.toLowerCase() === categoryFromUrl.toLowerCase());
+  const matchedCategory = categories.find(c => c.toLowerCase() === categoryFromUrl.toLowerCase());
+  const active = matchedCategory ? matchedCategory : 'All Work';
+
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [lightboxIdx, setLightboxIdx] = useState(null);
@@ -42,15 +50,17 @@ const Portfolio = () => {
   };
 
   const handleFilter = (cat) => {
-    setActive(cat);
+    if (categories.includes(cat)) {
+      setSearchParams({ category: cat });
+    } else {
+      setSearchParams({ category: 'All Work' });
+    }
   };
 
   const filtered = images.filter(img => {
-    const matchesCat = active === 'all' 
+    const matchesCat = active === 'All Work' 
       ? true 
-      : active === 'favorites'
-        ? favorites.includes(img._id)
-        : img.category === active;
+      : img.category === active;
         
     const matchesSearch = search.trim() === ''
       ? true
@@ -78,18 +88,16 @@ const Portfolio = () => {
           <div className="portfolio__filter-tabs">
             {categories.map((cat) => (
               <button
-                key={cat.key}
-                className={`portfolio__filter-btn ${active === cat.key ? 'portfolio__filter-btn--active' : ''}`}
-                onClick={() => handleFilter(cat.key)}
-                id={`filter-${cat.key}`}
+                key={cat}
+                className={`portfolio__filter-btn ${active === cat ? 'portfolio__filter-btn--active' : ''}`}
+                onClick={() => handleFilter(cat)}
+                id={`filter-${cat}`}
               >
-                {cat.label}
+                {cat}
                 <span className="portfolio__filter-count">
-                  {cat.key === 'all' 
+                  {cat === 'All Work' 
                     ? images.length 
-                    : cat.key === 'favorites'
-                      ? favorites.length
-                      : images.filter(i => i.category === cat.key).length}
+                    : images.filter(i => i.category === cat).length}
                 </span>
               </button>
             ))}

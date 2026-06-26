@@ -13,6 +13,7 @@ const PortfolioManager = () => {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const load = () => {
     setLoading(true);
@@ -21,7 +22,14 @@ const PortfolioManager = () => {
 
   useEffect(() => { load(); }, []);
 
-  const filtered = activeFilter === 'all' ? images : images.filter(i => i.category === activeFilter);
+  const filtered = images.filter(i => {
+    if (activeFilter !== 'all' && i.category !== activeFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return i.title?.toLowerCase().includes(q) || i.category?.toLowerCase().includes(q);
+    }
+    return true;
+  });
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -80,13 +88,24 @@ const PortfolioManager = () => {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="portfolio__filter-tabs" style={{ marginBottom: '24px' }}>
-        {['all','wedding','birthday','corporate','other'].map(cat => (
-          <button key={cat} className={`portfolio__filter-btn ${activeFilter===cat?'portfolio__filter-btn--active':''}`} onClick={() => setActiveFilter(cat)}>
-            {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase()+cat.slice(1)}
-          </button>
-        ))}
+      {/* Filters & Search */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div className="portfolio__filter-tabs" style={{ marginBottom: 0 }}>
+          {['all','wedding','birthday','corporate','other'].map(cat => (
+            <button key={cat} className={`portfolio__filter-btn ${activeFilter===cat?'portfolio__filter-btn--active':''}`} onClick={() => setActiveFilter(cat)}>
+              {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase()+cat.slice(1)}
+            </button>
+          ))}
+        </div>
+        <div style={{ flex: '1 1 250px', maxWidth: '350px' }}>
+          <input 
+            type="text" 
+            placeholder="Search images by title or category..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="form-input"
+          />
+        </div>
       </div>
 
       {loading ? (

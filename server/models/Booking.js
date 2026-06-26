@@ -11,21 +11,13 @@ const BookingSchema = new mongoose.Schema({
     name: String,
     price: Number
   }],
-  totalAmount: { type: Number, required: true },
   notes: { type: String, default: '' },
+  totalAmount: { type: Number, required: true },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'cancelled'],
-    default: 'pending'
-  },
-  bookingReference: { type: String, unique: true }
-}, { timestamps: true });
-
-BookingSchema.pre('save', function (next) {
-  if (!this.bookingReference) {
-    this.bookingReference = 'LB-' + Date.now().toString(36).toUpperCase();
+    enum: ['New', 'Contacted', 'Confirmed', 'Completed', 'Cancelled'],
+    default: 'New'
   }
-  next();
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Booking', BookingSchema);

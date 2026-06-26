@@ -21,6 +21,7 @@ const ServiceManager = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const load = () => {
     setLoading(true);
@@ -83,21 +84,41 @@ const ServiceManager = () => {
     }
   };
 
+  const filtered = services.filter(s => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return s.name?.toLowerCase().includes(q) || 
+           s.description?.toLowerCase().includes(q) || 
+           s.category?.toLowerCase().includes(q) || 
+           s.price?.toString().includes(q) || 
+           s.features?.some(f => f.toLowerCase().includes(q));
+  });
+
   return (
     <div className="admin-manager">
       <div className="admin-manager__header">
         <div>
           <h2 className="admin__page-title">Service Packages Editor</h2>
-          <p className="text-silver">{services.length} services configured</p>
+          <p className="text-silver">{filtered.length} services configured</p>
         </div>
-        <button className="btn btn-primary" onClick={openCreate} id="create-service-btn">
-          <FiPlus /> Add Package
-        </button>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <input 
+            type="text" 
+            placeholder="Search services..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="form-input"
+            style={{ width: '250px' }}
+          />
+          <button className="btn btn-primary" onClick={openCreate} id="create-service-btn">
+            <FiPlus /> Add Package
+          </button>
+        </div>
       </div>
 
       {loading ? <div className="spinner" /> : (
         <div className="services-editor-grid">
-          {services.map(s => {
+          {filtered.map(s => {
             const cardImg = s.imageUrl || defaultImages[s.category] || defaultImages.other;
             return (
               <div key={s._id} className="service-editor-card animate-fade-in">

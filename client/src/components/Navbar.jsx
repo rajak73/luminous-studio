@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiCamera, FiShoppingCart, FiMenu, FiX, FiSun, FiMoon } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import './Navbar.css';
 
@@ -9,6 +10,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { items } = useCart();
+  const { isAdmin } = useAuth();
   const location = useLocation();
 
   const [theme, setTheme] = useState(() => localStorage.getItem('luminosTheme') || 'dark');
@@ -25,8 +27,6 @@ const Navbar = () => {
       .catch(() => {});
   }, []);
 
-  const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
@@ -38,26 +38,20 @@ const Navbar = () => {
   const navLinks = [
     { to: '/', label: 'Home' },
     { to: '/portfolio', label: 'Portfolio' },
-    { to: '/services', label: 'Services' },
-    { to: '/tools', label: 'Interactive Tools' },
+    { to: '/services', label: 'Services' }
   ];
+
+  const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
 
   return (
     <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
       <div className="container navbar__inner">
-        {/* Logo */}
         <Link to="/" className="navbar__logo">
-          {settings?.logoUrl ? (
-            <img src={settings.logoUrl} alt={settings.studioName} style={{ height: '32px', objectFit: 'contain' }} />
-          ) : (
-            <>
-              <FiCamera className="navbar__logo-icon" />
-              <span>
-                <span className="navbar__logo-luminos">{settings?.studioName ? settings.studioName.split(' ')[0] : 'Luminos'}</span>
-                <span className="navbar__logo-studio">{settings?.studioName ? ' ' + settings.studioName.split(' ').slice(1).join(' ') : ' Studio'}</span>
-              </span>
-            </>
-          )}
+          <FiCamera className="navbar__logo-icon" />
+          <span>
+            <span className="navbar__logo-luminos">Luminos</span>
+            <span className="navbar__logo-studio"> Studio</span>
+          </span>
         </Link>
 
         {/* Desktop links */}
@@ -72,14 +66,18 @@ const Navbar = () => {
               </Link>
             </li>
           ))}
+          {isAdmin ? (
+            <li><Link to="/admin/dashboard" className="navbar__link text-gold">Admin Dashboard</Link></li>
+          ) : (
+            <li><Link to="/admin/login" className="navbar__link">Admin Login</Link></li>
+          )}
         </ul>
 
         {/* Right actions */}
         <div className="navbar__actions">
-          <button onClick={toggleTheme} className="navbar__theme-toggle" aria-label="Toggle theme">
+          <button onClick={toggleTheme} className="navbar__theme-toggle" aria-label="Toggle theme" style={{ padding: '8px', color: 'var(--cream)', background: 'transparent', border: 'none', cursor: 'pointer' }}>
             {theme === 'dark' ? <FiSun size={19} /> : <FiMoon size={19} />}
           </button>
-          
           <Link to="/cart" className="navbar__cart" aria-label="Cart">
             <FiShoppingCart size={20} />
             {items.length > 0 && <span className="badge">{items.length}</span>}
@@ -107,6 +105,11 @@ const Navbar = () => {
             {link.label}
           </Link>
         ))}
+        {isAdmin ? (
+          <Link to="/admin/dashboard" className="navbar__mobile-link text-gold" onClick={() => setMenuOpen(false)}>Admin Dashboard</Link>
+        ) : (
+          <Link to="/admin/login" className="navbar__mobile-link" onClick={() => setMenuOpen(false)}>Admin Login</Link>
+        )}
         <Link to="/cart" className="navbar__mobile-link" onClick={() => setMenuOpen(false)}>
           Cart {items.length > 0 && <span className="badge">{items.length}</span>}
         </Link>

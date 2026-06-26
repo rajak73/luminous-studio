@@ -3,28 +3,60 @@ import { FiShoppingBag } from 'react-icons/fi';
 import ServiceCard from '../components/ServiceCard';
 import api from '../api';
 import { useCart } from '../context/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import './Services.css';
 
-const categories = ['all', 'wedding', 'birthday', 'corporate', 'portrait'];
+const categories = ['All Services', 'Wedding', 'Birthday', 'Corporate', 'Portrait', 'Product'];
 
 const Services = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [settings, setSettings] = useState(null);
+  
+  const categoryFromUrl = searchParams.get('category') || 'All Services';
+  const searchQuery = searchParams.get('q') || '';
+  const isValidCategory = categories.some(c => c.toLowerCase() === categoryFromUrl.toLowerCase());
+  const matchedCategory = categories.find(c => c.toLowerCase() === categoryFromUrl.toLowerCase());
+  const activeCategory = matchedCategory ? matchedCategory : 'All Services';
+
   const [showCompare, setShowCompare] = useState(false);
   const { items } = useCart();
 
   useEffect(() => {
+    api.get('/settings').then(({ data }) => setSettings(data)).catch(() => {});
     api.get('/services')
       .then(({ data }) => setServices(data))
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = (activeCategory === 'all'
-    ? services
-    : services.filter(s => s.category === activeCategory)
-  ).filter(s => s.active !== false);
+  const handleSearch = (e) => {
+    const q = e.target.value;
+    setSearchParams(prev => {
+      const p = new URLSearchParams(prev);
+      if (q) p.set('q', q);
+      else p.delete('q');
+      return p;
+    });
+  };
+
+  const filtered = services.filter(s => {
+    if (s.active === false) return false;
+    if (activeCategory !== 'All Services' && s.category !== activeCategory) return false;
+    
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchName = s.name?.toLowerCase().includes(q);
+      const matchDesc = s.description?.toLowerCase().includes(q);
+      const matchCat = s.category?.toLowerCase().includes(q);
+      const matchOpts = s.options?.some(opt => opt.toLowerCase().includes(q));
+      const matchPrice = s.price?.toString().includes(q);
+      
+      if (!matchName && !matchDesc && !matchCat && !matchOpts && !matchPrice) return false;
+    }
+    
+    return true;
+  });
 
   return (
     <div className="services page-top">
@@ -57,17 +89,33 @@ const Services = () => {
       <div className="services__filters">
         <div className="container">
           <div className="portfolio__filter-tabs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  className={`portfolio__filter-btn ${activeCategory === cat ? 'portfolio__filter-btn--active' : ''}`}
-                  onClick={() => setActiveCategory(cat)}
-                  id={`services-filter-${cat}`}
-                >
-                  {cat === 'all' ? 'All Services' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </button>
-              ))}
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
+              <input 
+                type="text" 
+                placeholder="Search services by name, description, or price..." 
+                value={searchQuery} 
+                onChange={handleSearch}
+                className="form-input"
+                style={{ flex: '1 1 250px', maxWidth: '350px' }}
+              />
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    className={`portfolio__filter-btn ${activeCategory === cat ? 'portfolio__filter-btn--active' : ''}`}
+                    onClick={() => {
+                      setSearchParams(prev => {
+                        const p = new URLSearchParams(prev);
+                        p.set('category', cat);
+                        return p;
+                      });
+                    }}
+                    id={`services-filter-${cat}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
             <button className="btn btn-outline-gold btn-sm" onClick={() => setShowCompare(true)}>
               Compare Packages
@@ -82,10 +130,20 @@ const Services = () => {
           <div className="grid-3">
             {Array(6).fill(0).map((_, i) => <div key={i} className="skeleton" style={{height:'420px', borderRadius:'12px'}} />)}
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center" style={{ padding: '60px 0' }}>
+            <h3 className="display-sm text-silver">No services found</h3>
+            <p className="text-muted" style={{ marginTop: '12px' }}>
+              We couldn't find any services matching "{searchQuery}" in {activeCategory}.
+            </p>
+            <button className="btn btn-primary" onClick={() => setSearchParams({})} style={{ marginTop: '24px' }}>
+              Clear Search
+            </button>
+          </div>
         ) : (
           <div className="grid-3 animate-stagger">
             {filtered.map(service => (
-              <ServiceCard key={service._id} service={service} />
+              <ServiceCard key={service._id} service={service} whatsappNumber={settings?.whatsappNumber} />
             ))}
           </div>
         )}

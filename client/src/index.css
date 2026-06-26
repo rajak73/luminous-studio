@@ -4,16 +4,16 @@
    DESIGN TOKENS
    ============================================================ */
 :root {
-  --gold: #C9A84C;
-  --gold-light: #E8C96A;
-  --gold-dark: #9E7C30;
-  --charcoal: #0D0D0D;
-  --charcoal-2: #141414;
-  --charcoal-3: #1C1C1C;
+  --gold: #D4AF37;
+  --gold-light: #F8E29A;
+  --gold-dark: #B8860B;
+  --charcoal: #0B0B0D;
+  --charcoal-2: #111111;
+  --charcoal-3: #151515;
   --charcoal-4: #242424;
-  --cream: #F5F0E8;
-  --cream-dim: #C8C0B0;
-  --silver: #8A8A8A;
+  --cream: #F8F5ED;
+  --cream-dim: #A8A29E;
+  --silver: #A8A29E;
   --white: #FFFFFF;
   --danger: #E05252;
   --success: #52C07A;
@@ -36,22 +36,23 @@
   --navbar-height: 72px;
   
   --navbar-bg: rgba(13, 13, 13, 0.92);
-  --navbar-mobile-bg: rgba(13, 13, 13, 0.97);
 }
 
 /* ── Light Mode Override ── */
 [data-theme='light'] {
-  --charcoal: #F8F6F2;
-  --charcoal-2: #FFFFFF;
-  --charcoal-3: #F0EDE6;
+  --charcoal: #F8F5ED;
+  --charcoal-2: #F0EDE6;
+  --charcoal-3: #FFFFFF;
   --charcoal-4: #E6E2D8;
-  --cream: #0D0D0D;
-  --cream-dim: #2D2D2D;
-  --silver: #5E5E5E;
-  --white: #000000;
+  --cream: #111111;
+  --cream-dim: #57534E;
+  --silver: #57534E;
+  --gold: #B8860B;
+  --gold-light: #D4AF37;
+  --gold-dark: #9E7C30;
   
-  --navbar-bg: rgba(248, 246, 242, 0.92);
-  --navbar-mobile-bg: rgba(248, 246, 242, 0.97);
+  --navbar-bg: rgba(248, 245, 237, 0.92);
+  --navbar-mobile-bg: rgba(248, 245, 237, 0.97);
 }
 
 /* ============================================================

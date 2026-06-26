@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FiCheck, FiShoppingCart, FiStar } from 'react-icons/fi';
+import { FiCheck, FiShoppingCart, FiStar, FiMessageCircle } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import './ServiceCard.css';
 
@@ -14,7 +14,7 @@ const defaultImages = {
 const formatPrice = (price) =>
   '₹' + price.toLocaleString('en-IN');
 
-const ServiceCard = ({ service }) => {
+const ServiceCard = ({ service, whatsappNumber }) => {
   const { addItem, items } = useCart();
   const inCart = items.some((i) => i._id === service._id);
   const cardImg = service.imageUrl || defaultImages[service.category] || defaultImages.other;
@@ -62,6 +62,18 @@ const ServiceCard = ({ service }) => {
           <FiShoppingCart size={15} />
           {inCart ? 'Added to Cart' : 'Add to Cart'}
         </button>
+
+        {whatsappNumber && (
+          <a 
+            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello Luminos Studio, I am interested in ${service.name}. Please share details.`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-outline-gold btn-full service-card__cta"
+            style={{ marginTop: '12px' }}
+          >
+            <FiMessageCircle size={15} /> Ask on WhatsApp
+          </a>
+        )}
       </div>
     </div>
   );

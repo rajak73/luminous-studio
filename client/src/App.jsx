@@ -1,10 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import WhatsAppFloating from './components/WhatsAppFloating';
+import { FiArrowLeft } from 'react-icons/fi';
 import Home from './pages/Home';
 import Portfolio from './pages/Portfolio';
 import Services from './pages/Services';
@@ -16,14 +18,7 @@ import PortfolioManager from './pages/admin/PortfolioManager';
 import ServiceManager from './pages/admin/ServiceManager';
 import BookingManager from './pages/admin/BookingManager';
 import AccountSettings from './pages/admin/AccountSettings';
-import AnalyticsView from './pages/admin/AnalyticsView';
-import CustomerManager from './pages/admin/CustomerManager';
-import BusinessManager from './pages/admin/BusinessManager';
-import ClientPortal from './pages/ClientPortal';
-import InteractiveTools from './pages/InteractiveTools';
-import Blog from './pages/Blog';
-import WhatsAppWidget from './components/WhatsAppWidget';
-import Chatbot from './components/Chatbot';
+import StudioAssistant from './components/StudioAssistant';
 
 // Protected Route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -31,15 +26,26 @@ const ProtectedRoute = ({ children }) => {
   return isAdmin ? children : <Navigate to="/admin/login" replace />;
 };
 
-const PublicLayout = ({ children }) => (
-  <>
-    <Navbar />
-    <main>{children}</main>
-    <Footer />
-    <WhatsAppWidget />
-    <Chatbot />
-  </>
-);
+const PublicLayout = ({ children }) => {
+  const { isAdmin } = useAuth();
+  return (
+    <>
+      <Navbar />
+      <main>{children}</main>
+      <Footer />
+      {!isAdmin && <WhatsAppFloating />}
+      {isAdmin && (
+        <Link 
+          to="/admin/dashboard" 
+          className="btn btn-primary animate-fade-in" 
+          style={{ position: 'fixed', bottom: '24px', left: '24px', zIndex: 9999, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', padding: '10px 16px', borderRadius: '50px', fontSize: '0.9rem' }}
+        >
+          <FiArrowLeft /> Back to Admin
+        </Link>
+      )}
+    </>
+  );
+};
 
 function App() {
   return (
@@ -51,18 +57,14 @@ function App() {
             <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
             <Route path="/portfolio" element={<PublicLayout><Portfolio /></PublicLayout>} />
             <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
-            <Route path="/tools" element={<PublicLayout><InteractiveTools /></PublicLayout>} />
-            <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
-            <Route path="/portal" element={<PublicLayout><ClientPortal /></PublicLayout>} />
             <Route path="/cart" element={<PublicLayout><Cart /></PublicLayout>} />
             <Route path="/booking" element={<PublicLayout><Booking /></PublicLayout>} />
 
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}>
-              <Route path="analytics" element={<AnalyticsView />} />
-              <Route path="operations" element={<CustomerManager />} />
-              <Route path="business" element={<BusinessManager />} />
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<></>} />
               <Route path="portfolio" element={<PortfolioManager />} />
               <Route path="services" element={<ServiceManager />} />
               <Route path="bookings" element={<BookingManager />} />
@@ -72,6 +74,7 @@ function App() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <StudioAssistant />
 
           <ToastContainer
             position="top-right"

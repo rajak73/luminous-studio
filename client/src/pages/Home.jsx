@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiCamera, FiHeart, FiBriefcase, FiAward, FiClock, FiUsers } from 'react-icons/fi';
+import { FiArrowRight, FiCamera, FiHeart, FiBriefcase, FiAward, FiClock, FiUsers, FiMessageCircle } from 'react-icons/fi';
 import HeroSlider from '../components/HeroSlider';
 import Lightbox from '../components/Lightbox';
 import api from '../api';
@@ -21,8 +21,10 @@ const Home = () => {
   const [featuredImages, setFeaturedImages] = useState([]);
   const [services, setServices] = useState([]);
   const [lightboxIdx, setLightboxIdx] = useState(null);
+  const [settings, setSettings] = useState(null);
 
   useEffect(() => {
+    api.get('/settings').then(({ data }) => setSettings(data)).catch(() => {});
     api.get('/portfolio').then(({ data }) => setFeaturedImages(data.filter(i => i.featured).slice(0, 6)));
     api.get('/services').then(({ data }) => setServices(data.slice(0, 3)));
   }, []);
@@ -129,10 +131,20 @@ const Home = () => {
           <div className="section-label">Ready to Begin?</div>
           <h2 className="display-md">Let's Create Something<br /><span className="text-gold">Extraordinary</span></h2>
           <p className="home__cta-sub">Book your photography session today and preserve your most precious memories forever.</p>
-          <div className="home__cta-buttons">
+          <div className="home__cta-buttons" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <Link to="/booking" className="btn btn-primary btn-lg">
               Book Your Session <FiArrowRight />
             </Link>
+            {settings?.whatsappNumber && (
+              <a 
+                href={`https://wa.me/${settings.whatsappNumber}?text=${encodeURIComponent("Hello Luminos Studio, I want to enquire about a photography booking.")}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn btn-outline-gold btn-lg"
+              >
+                <FiMessageCircle /> Chat on WhatsApp
+              </a>
+            )}
             <Link to="/services" className="btn btn-secondary btn-lg">
               Explore Services
             </Link>

@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-let apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://luminous-studio-backend.onrender.com/api';
-if (apiBaseUrl && !apiBaseUrl.endsWith('/api') && !apiBaseUrl.endsWith('/api/')) {
+let apiBaseUrl = import.meta.env.VITE_API_URL;
+if (!apiBaseUrl) {
+  console.error("VITE_API_URL environment variable is missing!");
+  // Fail gracefully if needed, but do not hardcode localhost
+} else if (!apiBaseUrl.endsWith('/api') && !apiBaseUrl.endsWith('/api/')) {
   apiBaseUrl = apiBaseUrl.replace(/\/$/, '') + '/api';
 }
 

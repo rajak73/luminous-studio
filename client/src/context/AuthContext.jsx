@@ -10,43 +10,25 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(false);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/login', { username, password });
-      if (data.require2FA) {
-        return { success: true, require2FA: true, username: data.username };
-      }
+      const { data } = await api.post('/auth/login', { email, password });
       localStorage.setItem('luminosToken', data.token);
-      localStorage.setItem('luminosUser', JSON.stringify({ username: data.username, role: data.role }));
-      setUser({ username: data.username, role: data.role });
+      localStorage.setItem('luminosUser', JSON.stringify({ email: data.email, role: data.role }));
+      setUser({ email: data.email, role: data.role });
       return { success: true, role: data.role };
     } catch (err) {
-      return { success: false, message: err.response?.data?.message || 'Login failed' };
+      return { success: false, message: 'Invalid email or password' };
     } finally {
       setLoading(false);
     }
   };
 
-  const verify2FA = async (username, code) => {
+  const register = async (email, password, phone, fullName) => {
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/verify-2fa', { username, code });
-      localStorage.setItem('luminosToken', data.token);
-      localStorage.setItem('luminosUser', JSON.stringify({ username: data.username, role: data.role }));
-      setUser({ username: data.username, role: data.role });
-      return { success: true, role: data.role };
-    } catch (err) {
-      return { success: false, message: err.response?.data?.message || '2FA code verification failed' };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const register = async (username, password, email, phone, fullName) => {
-    setLoading(true);
-    try {
-      await api.post('/auth/register', { username, password, email, phone, fullName });
+      await api.post('/auth/register', { email, password, phone, fullName });
       return { success: true };
     } catch (err) {
       return { success: false, message: err.response?.data?.message || 'Registration failed' };
@@ -55,10 +37,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUser = (newUsername, newToken) => {
+  const updateUser = (newEmail, newToken) => {
     localStorage.setItem('luminosToken', newToken);
-    localStorage.setItem('luminosUser', JSON.stringify({ username: newUsername, role: user?.role }));
-    setUser({ username: newUsername, role: user?.role });
+    localStorage.setItem('luminosUser', JSON.stringify({ email: newEmail, role: user?.role }));
+    setUser({ email: newEmail, role: user?.role });
   };
 
   const logout = () => {
@@ -83,7 +65,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, verify2FA, register, logout, updateUser, loading, isAdmin: user?.role === 'admin', isCustomer: user?.role === 'customer' }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateUser, loading, isAdmin: user?.role === 'admin', isCustomer: user?.role === 'customer' }}>
       {children}
     </AuthContext.Provider>
   );

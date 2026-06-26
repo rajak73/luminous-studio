@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { FiHome, FiCalendar, FiMessageSquare, FiImage, FiGrid, FiSettings, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiCalendar, FiMessageSquare, FiImage, FiGrid, FiSettings, FiLogOut, FiMenu, FiX, FiSun, FiMoon } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api';
 import './AdminDashboard.css';
 
 const navItems = [
-  { to: '/admin', icon: <FiHome />, label: 'Dashboard', exact: true },
+  { to: '/admin/dashboard', icon: <FiHome />, label: 'Dashboard', exact: true },
   { to: '/admin/bookings', icon: <FiCalendar />, label: 'Bookings' },
-  { to: '/admin/operations', icon: <FiMessageSquare />, label: 'Queries' },
   { to: '/admin/portfolio', icon: <FiImage />, label: 'Gallery' },
   { to: '/admin/services', icon: <FiGrid />, label: 'Services' },
   { to: '/admin/settings', icon: <FiSettings />, label: 'Settings' },
@@ -20,6 +19,12 @@ const AdminDashboard = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState(null);
+  const [theme, setTheme] = useState(() => localStorage.getItem('luminosTheme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('luminosTheme', theme);
+  }, [theme]);
 
   useEffect(() => {
     api.get('/bookings/stats').then(({ data }) => setStats(data)).catch(() => {});
@@ -27,7 +32,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => { logout(); navigate('/admin/login'); };
 
-  const isActive = (item) => item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to) && item.to !== '/admin';
+  const isActive = (item) => item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to) && item.to !== '/admin' && item.to !== '/admin/dashboard';
 
   return (
     <div className="admin">
@@ -55,6 +60,14 @@ const AdminDashboard = () => {
               <span>{item.label}</span>
             </Link>
           ))}
+          <Link
+            to="/"
+            className="admin__nav-item"
+            style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}
+          >
+            <FiHome />
+            <span>View Website</span>
+          </Link>
         </nav>
 
         <button className="admin__logout-btn" onClick={handleLogout} style={{
@@ -90,6 +103,13 @@ const AdminDashboard = () => {
             {location.pathname === '/admin/services' ? 'Service Packages Editor' : (navItems.find(n => isActive(n))?.label || 'Dashboard')}
           </div>
           <div className="admin__topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button 
+              onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} 
+              style={{ background: 'transparent', border: 'none', color: 'var(--cream)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '6px' }}
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <FiSun size={18} /> : <FiMoon size={18} />}
+            </button>
             <span className="admin__topbar-welcome" style={{ fontSize: '0.82rem', color: 'var(--silver)' }}>
               Welcome, {user?.fullName || user?.username || 'Jonathan Admin'}
             </span>
@@ -112,15 +132,14 @@ const AdminDashboard = () => {
 
         {/* Page content */}
         <main className="admin__content">
-          {location.pathname === '/admin' && stats && (
+          {location.pathname === '/admin/dashboard' && stats && (
             <div className="admin__overview">
               <h2 className="admin__page-title">Dashboard Overview</h2>
               <div className="admin__stats-grid animate-stagger">
                 {[
                   { label: 'Total Bookings', value: stats.total, color: 'var(--gold)' },
                   { label: 'Pending', value: stats.pending, color: 'var(--gold)' },
-                  { label: 'Confirmed', value: stats.confirmed, color: 'var(--success)' },
-                  { label: 'Revenue (Confirmed)', value: `₹${(stats.revenue || 0).toLocaleString('en-IN')}`, color: 'var(--success)' },
+                  { label: 'Confirmed', value: stats.confirmed, color: 'var(--success)' }
                 ].map((s) => (
                   <div key={s.label} className="admin__stat-card card">
                     <div className="admin__stat-label">{s.label}</div>

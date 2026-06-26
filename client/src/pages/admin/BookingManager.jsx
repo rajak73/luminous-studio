@@ -9,6 +9,7 @@ const BookingManager = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeStatus, setActiveStatus] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const load = (status) => {
     setLoading(true);
@@ -37,19 +38,40 @@ const BookingManager = () => {
     } catch { toast.error('Delete failed'); }
   };
 
+  const filtered = bookings.filter(b => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return b.customerName?.toLowerCase().includes(q) || 
+           b.email?.toLowerCase().includes(q) || 
+           b.phone?.includes(q) || 
+           b.status?.toLowerCase().includes(q) || 
+           b.bookingReference?.toLowerCase().includes(q) ||
+           b.services?.some(s => s.name?.toLowerCase().includes(q));
+  });
+
   return (
     <div className="admin-manager">
       <div className="admin-manager__header">
         <div>
           <h2 className="admin__page-title">Booking Manager</h2>
-          <p className="text-silver">{bookings.length} bookings found</p>
+          <p className="text-silver">{filtered.length} bookings found</p>
         </div>
-        <div className="portfolio__filter-tabs">
-          {statuses.map(s => (
-            <button key={s} className={`portfolio__filter-btn ${activeStatus===s?'portfolio__filter-btn--active':''}`} onClick={() => handleFilter(s)} id={`filter-booking-${s}`}>
-              <FiFilter size={12} /> {s.charAt(0).toUpperCase()+s.slice(1)}
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <input 
+            type="text" 
+            placeholder="Search by name, email, phone, reference..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="form-input"
+            style={{ width: '280px' }}
+          />
+          <div className="portfolio__filter-tabs" style={{ marginBottom: 0 }}>
+            {statuses.map(s => (
+              <button key={s} className={`portfolio__filter-btn ${activeStatus===s?'portfolio__filter-btn--active':''}`} onClick={() => handleFilter(s)} id={`filter-booking-${s}`}>
+                <FiFilter size={12} /> {s.charAt(0).toUpperCase()+s.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -70,7 +92,7 @@ const BookingManager = () => {
               </tr>
             </thead>
             <tbody>
-              {bookings.map(b => (
+              {filtered.map(b => (
                 <tr key={b._id}>
                   <td><span className="text-gold" style={{fontFamily:'var(--font-heading)',fontSize:'0.95rem'}}>{b.bookingReference}</span></td>
                   <td>
