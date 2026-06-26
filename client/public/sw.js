@@ -1,4 +1,4 @@
-const CACHE_NAME = 'luminosbook-v1';
+const CACHE_NAME = 'luminosbook-v2';
 const ASSETS = [
   '/',
   '/index.html',
