@@ -23,7 +23,7 @@ const PortfolioManager = () => {
   useEffect(() => { load(); }, []);
 
   const filtered = images.filter(i => {
-    if (activeFilter !== 'all' && i.category !== activeFilter) return false;
+    if (activeFilter !== 'all' && i.category?.toLowerCase() !== activeFilter.toLowerCase()) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       return i.title?.toLowerCase().includes(q) || i.category?.toLowerCase().includes(q);

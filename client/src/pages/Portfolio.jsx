@@ -60,7 +60,7 @@ const Portfolio = () => {
   const filtered = images.filter(img => {
     const matchesCat = active === 'All Work' 
       ? true 
-      : img.category === active;
+      : img.category?.toLowerCase() === active.toLowerCase();
         
     const matchesSearch = search.trim() === ''
       ? true
@@ -97,7 +97,7 @@ const Portfolio = () => {
                 <span className="portfolio__filter-count">
                   {cat === 'All Work' 
                     ? images.length 
-                    : images.filter(i => i.category === cat).length}
+                    : images.filter(i => i.category?.toLowerCase() === cat.toLowerCase()).length}
                 </span>
               </button>
             ))}
