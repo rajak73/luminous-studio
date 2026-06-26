@@ -79,6 +79,21 @@ router.put('/:id', protect, upload.single('image'), async (req, res) => {
   }
 });
 
+// PATCH /api/portfolio/:id/featured - admin only
+router.patch('/:id/featured', protect, async (req, res) => {
+  try {
+    const portfolio = await Portfolio.findById(req.params.id);
+    if (!portfolio) return res.status(404).json({ message: 'Portfolio item not found' });
+    
+    portfolio.featured = !portfolio.featured;
+    await portfolio.save();
+    
+    res.json(portfolio);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // DELETE /api/portfolio/:id - admin only
 router.delete('/:id', protect, async (req, res) => {
   try {

@@ -12,7 +12,7 @@ const defaultImages = {
   other: 'https://images.unsplash.com/photo-1452587925148-ce544e77e60d?q=80&w=800'
 };
 
-const emptyForm = { name: '', description: '', price: '', category: 'wedding', features: '', popular: false, imageUrl: '', active: true };
+const emptyForm = { name: '', description: '', price: '', category: 'wedding', options: '', popular: false, imageUrl: '', isActive: true };
 
 const ServiceManager = () => {
   const [services, setServices] = useState([]);
@@ -33,7 +33,7 @@ const ServiceManager = () => {
   const openCreate = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
   const openEdit = (s) => {
     setEditing(s._id);
-    setForm({ ...s, features: s.features.join('\n'), price: s.price.toString(), imageUrl: s.imageUrl || '', active: s.active !== false });
+    setForm({ ...s, options: s.options?.join('\n') || '', price: s.price.toString(), imageUrl: s.imageUrl || '', isActive: s.isActive !== false });
     setShowModal(true);
   };
 
@@ -44,8 +44,8 @@ const ServiceManager = () => {
       const payload = { 
         ...form, 
         price: Number(form.price), 
-        features: form.features.split('\n').map(f => f.trim()).filter(Boolean),
-        active: form.active !== false
+        options: form.options.split('\n').map(f => f.trim()).filter(Boolean),
+        isActive: form.isActive !== false
       };
       if (editing) {
         const { data } = await api.put(`/services/${editing}`, payload);
@@ -71,15 +71,15 @@ const ServiceManager = () => {
   };
 
   const handleToggleActive = async (s) => {
-    const nextActive = s.active === false ? true : false;
+    const nextActive = s.isActive === false ? true : false;
     // Optimistic UI update
-    setServices(prev => prev.map(item => item._id === s._id ? { ...item, active: nextActive } : item));
+    setServices(prev => prev.map(item => item._id === s._id ? { ...item, isActive: nextActive } : item));
     try {
-      await api.put(`/services/${s._id}`, { ...s, active: nextActive });
+      await api.put(`/services/${s._id}`, { ...s, isActive: nextActive });
       toast.success(`Service status set to ${nextActive ? 'Active' : 'Inactive'}`);
     } catch (err) {
       // Rollback on error
-      setServices(prev => prev.map(item => item._id === s._id ? { ...item, active: !nextActive } : item));
+      setServices(prev => prev.map(item => item._id === s._id ? { ...item, isActive: !nextActive } : item));
       toast.error('Failed to update status');
     }
   };
@@ -91,7 +91,7 @@ const ServiceManager = () => {
            s.description?.toLowerCase().includes(q) || 
            s.category?.toLowerCase().includes(q) || 
            s.price?.toString().includes(q) || 
-           s.features?.some(f => f.toLowerCase().includes(q));
+           s.options?.some(f => f.toLowerCase().includes(q));
   });
 
   return (
@@ -136,7 +136,7 @@ const ServiceManager = () => {
                   <div className="service-editor-card__deliverables-section">
                     <span className="service-editor-card__deliverables-label">Deliverables:</span>
                     <ul className="service-editor-card__deliverables-list">
-                      {(s.features || []).slice(0, 4).map((f, idx) => (
+                      {(s.options || []).slice(0, 4).map((f, idx) => (
                         <li key={idx} className="service-editor-card__deliverable">{f}</li>
                       ))}
                     </ul>
@@ -148,13 +148,13 @@ const ServiceManager = () => {
                     <span className="switch">
                       <input 
                         type="checkbox" 
-                        checked={s.active !== false} 
+                        checked={s.isActive !== false} 
                         onChange={() => handleToggleActive(s)}
                       />
                       <span className="slider"></span>
                     </span>
-                    <span className="switch-label" style={{ color: s.active !== false ? 'var(--gold)' : 'var(--silver)', cursor: 'pointer' }}>
-                      {s.active !== false ? 'Active' : 'Inactive'}
+                    <span className="switch-label" style={{ color: s.isActive !== false ? 'var(--gold)' : 'var(--silver)', cursor: 'pointer' }}>
+                      {s.isActive !== false ? 'Active' : 'Inactive'}
                     </span>
                   </label>
                   
@@ -207,7 +207,7 @@ const ServiceManager = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Features / Deliverables (one per line)</label>
-                <textarea className="form-input" value={form.features} onChange={e => setForm({...form, features: e.target.value})} rows={4} placeholder="Full day coverage&#10;2 photographers&#10;500+ edited photos" />
+                <textarea className="form-input" value={form.options} onChange={e => setForm({...form, options: e.target.value})} rows={4} placeholder="Full day coverage&#10;2 photographers&#10;500+ edited photos" />
               </div>
               
               <div style={{ display: 'flex', gap: '24px', alignItems: 'center', paddingTop: '8px' }}>
@@ -216,7 +216,7 @@ const ServiceManager = () => {
                   <label htmlFor="popular-check" className="form-label" style={{marginBottom:0}}>Mark as Popular</label>
                 </div>
                 <div className="flex gap-sm" style={{alignItems:'center'}}>
-                  <input type="checkbox" id="active-check" checked={form.active !== false} onChange={e => setForm({...form, active: e.target.checked})} />
+                  <input type="checkbox" id="active-check" checked={form.isActive !== false} onChange={e => setForm({...form, isActive: e.target.checked})} />
                   <label htmlFor="active-check" className="form-label" style={{marginBottom:0}}>Active</label>
                 </div>
               </div>
