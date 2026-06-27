@@ -37,7 +37,7 @@
 
 .services__filters {
   padding: 16px 0;
-  background: rgba(13,13,13,0.7);
+  background: var(--navbar-bg);
   position: sticky;
   top: var(--navbar-height);
   z-index: 100;
