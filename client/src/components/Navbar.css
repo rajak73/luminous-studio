@@ -17,6 +17,20 @@
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
+/* Force dark mode text variables on dark backgrounds (like the home hero) */
+.navbar--force-dark {
+  --cream: #F8F5ED;
+  --cream-dim: #A8A29E;
+  --silver: #A8A29E;
+  --charcoal: #0B0B0D;
+  --charcoal-2: #111111;
+  --charcoal-3: #151515;
+  --charcoal-4: #242424;
+  --gold: #D4AF37;
+  --gold-light: #F8E29A;
+  --gold-dark: #B8860B;
+}
+
 .navbar__inner {
   display: flex;
   align-items: center;

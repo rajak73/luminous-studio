@@ -43,8 +43,11 @@ const Navbar = () => {
 
   const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
 
+  const isHome = location.pathname === '/';
+  const forceDark = isHome && !scrolled;
+
   return (
-    <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
+    <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''} ${forceDark ? 'navbar--force-dark' : ''}`}>
       <div className="container navbar__inner">
         <Link to="/" className="navbar__logo">
           <FiCamera className="navbar__logo-icon" />
