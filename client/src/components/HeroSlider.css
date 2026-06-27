@@ -5,6 +5,18 @@
   overflow: hidden;
   display: flex;
   align-items: center;
+  /* Force dark mode variables because the slider images are dark */
+  --cream: #F8F5ED;
+  --cream-dim: #A8A29E;
+  --silver: #A8A29E;
+  --charcoal: #0B0B0D;
+  --charcoal-2: #111111;
+  --charcoal-3: #151515;
+  --charcoal-4: #242424;
+  --gold: #D4AF37;
+  --gold-light: #F8E29A;
+  --gold-dark: #B8860B;
+  color: var(--cream);
 }
 
 .hero__slide {
