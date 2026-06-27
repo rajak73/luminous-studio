@@ -117,7 +117,7 @@ const Booking = () => {
       setBooking(data.booking);
       clearCart();
     } catch (err) {
-      alert('Booking failed. Please try again.');
+      alert(err.response?.data?.message || 'Booking failed. Please try again.');
     } finally {
       setLoading(false);
     }

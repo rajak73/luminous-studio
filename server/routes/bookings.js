@@ -53,9 +53,7 @@ const sendConfirmationEmail = async (booking) => {
 // POST /api/bookings - public
 router.post('/', async (req, res) => {
   try {
-    if (!req.body.services || req.body.services.length === 0) {
-      return res.status(400).json({ message: 'Cart is empty. Please select services before booking.' });
-    }
+    // Allow booking without specific services for general inquiries
     const booking = new Booking(req.body);
     await booking.save();
     
@@ -63,6 +61,17 @@ router.post('/', async (req, res) => {
     sendConfirmationEmail(booking).catch(console.error);
     
     res.status(201).json({ message: 'Booking submitted successfully', booking });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/bookings/booked-dates - public
+router.get('/booked-dates', async (req, res) => {
+  try {
+    const bookings = await Booking.find({ status: { $ne: 'Cancelled' } }).select('eventDate');
+    const dates = bookings.map(b => b.eventDate.toISOString().split('T')[0]);
+    res.json(dates);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
